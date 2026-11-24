@@ -2,7 +2,7 @@
 
 本專案以 [AHEAD](https://doi.org/10.1145/3770855.3817610) 的 GraphMixer 模型為基礎，探討節點歷史鄰居數量對異常分數校正的影響。研究比較六種校正方法，使用 Digg、Bitcoin-Alpha、Wikipedia 與 MOOC 四個資料集，以及兩種模型選擇策略和五個隨機種子。
 
-主要發現是：提高低度數事件的異常分數，在 Digg 與 Wikipedia 上改善 AUROC，但在 Bitcoin-Alpha 與 MOOC 上降低 AUROC。校正方向需要考量資料集特性。
+在已用於探索的實驗區間 D 中，相較於原始校正方法（Original），Fixed 1.1 在兩種模型選擇策略下的平均 AUROC 均於 Digg 與 Wikipedia 較高，在 Bitcoin-Alpha 與 MOOC 較低。結果顯示固定度數校正倍率的適用性因資料集而異，並非獨立測試集的驗證結果。
 
 ## 快速開始
 
@@ -61,7 +61,7 @@ MOOC 是額外納入的時間二分圖資料集，可用於比較教育領域與
 
 ## 實驗結果
 
-以下為 Fixed 1.1 減去 Original 的五個隨機種子平均 AUROC 差值，正值表示改善，負值表示下降。兩欄代表不同模型選擇策略。
+以下為探索區間 D 中 Fixed 1.1 減去 Original 的五個隨機種子平均 AUROC 差值，正值表示改善，負值表示下降。兩欄代表不同模型選擇策略。
 
 | 資料集 | Validation AUROC | Train Loss |
 |---|---:|---:|
@@ -83,7 +83,7 @@ MOOC 是額外納入的時間二分圖資料集，可用於比較教育領域與
 | Wikipedia `[94484,110232)` | 1,288／13／1.0093% | 14,460／8／0.0553% |
 | MOOC `[247049,288224)` | 865／0／0% | 40,310／389／0.9650% |
 
-MOOC 在此 D 區間的低度數組沒有正類事件。提高該組分數可能使低度數負類排在部分高度數正類之前。Fixed 1.1 相對 None 的平均 AUROC 差值分別為 −0.004885（Validation AUROC）及 −0.000789（Train Loss）。此結果反映既有分數的排序變化，而非因果關係或其他資料集的普遍規律。
+MOOC 在此 D 區間的低度數組沒有正類事件。對低度數事件套用 1.1 倍率後，部分低度數負類與高度數正類的相對排序發生不利變化。Fixed 1.1 相對 None 的平均 AUROC 差值分別為 −0.004885（Validation AUROC）及 −0.000789（Train Loss）。此結果反映既有分數的排序變化，而非因果關係或其他資料集的普遍規律。
 
 結果來源：[校正比較](src/research_runs/fixed_degree_up_exploration_20261123/report.json)、[度數分布](src/research_runs/unlabeled_median_exploration_20261123/report.json)。
 
@@ -102,6 +102,14 @@ MOOC 在此 D 區間的低度數組沒有正類事件。提高該組分數可能
 | `src/prepare_jodie_research.py` | JODIE 格式資料轉換 |
 | `src/research_runs/` | 實驗結果與版本、模型選擇紀錄 |
 | `tests/` | 結果展示與驗證工具測試 |
+| `src/run_degree_development.py`、`src/run_segmented_development.py` | 開發區間推論與結果輸出 |
+| `src/evaluate_shared_research.py` | 測試集評估與結果輸出，與 Level 2 指標驗證不同 |
+| `src/tests/` | 校正方法與補充研究測試 |
+| `src/saved_results/degree_ablation/digg/` | 早期 Digg 消融實驗結果，須留意舊 Test 選模限制 |
+
+`src/` 亦包含標籤來源查核及補充校正研究程式（如 `audit_*`、`prototype` 與 `development` 相關檔案），部分為主要方法的相依程式。
+
+`src/README.md` 保留 AHEAD 原始專案的說明文件，其中的訓練指令不適用於本專案封裝。請以本頁提供的執行指令為準。
 
 ## 實驗環境與安裝
 
@@ -116,7 +124,7 @@ MOOC 在此 D 區間的低度數組沒有正類事件。提高該組分數可能
 | Python／PyTorch | Python 3.12.3；PyTorch 2.6.0+cu126，PyTorch CUDA build **12.6** |
 | 套件 | NumPy 1.26.4、SciPy 1.13.1、pandas 2.2.3、scikit-learn 1.5.2；其餘參考 `requirements.txt` |
 
-如需執行模型或評估指標驗證，請在 Linux 專案根目錄建立虛擬環境。以下為對應原實驗版本的安裝指令：
+如需執行模型或評估指標驗證，請在 Linux 專案根目錄建立虛擬環境。以下安裝指令依據本研究使用的套件版本整理；全新環境的安裝與完整執行仍待驗證：
 
 ```bash
 python3.12 -m venv .venv
@@ -158,7 +166,7 @@ Digg 與 Bitcoin-Alpha 的完整前處理鏈仍有缺項，現有公開資料不
 
 ## 模型訓練與評估
 
-以下為 Digg 的原實驗參數範例。執行前須準備相符的處理後資料、相依套件、標籤及運算設備。從專案根目錄執行：
+以下以 Digg 為例，展示本研究使用的訓練參數與執行方式；完整訓練與分數重建的驗證範圍請參閱[研究限制](#研究限制)。執行前須準備相符的處理後資料、相依套件、標籤及運算設備。從專案根目錄執行：
 
 ```bash
 cd src
@@ -169,13 +177,13 @@ AHEAD_DEGREE_CALIB_MODE=original python -B train_shared_research.py \
   --time_gap 2000 --optimizer Adam --learning_rate 0.0001 --val_ratio 0.05 --test_ratio 0.5 --gpu 0
 ```
 
-`AHEAD_RESEARCH_RUN_ID` 指定實驗名稱，必須使用新名稱；`AHEAD_SHARED_TRAINING_CONFIRM=1` 為訓練確認開關。輸出位於 `src/research_runs/my_new_digg_run/`。`--gpu 0` 使用可見 GPU 0，`--gpu -1` 選擇 CPU。
+`AHEAD_RESEARCH_RUN_ID` 指定實驗名稱，必須使用新名稱；`AHEAD_SHARED_TRAINING_CONFIRM=1` 為訓練確認開關。輸出位於 `src/research_runs/my_new_digg_run/`。`--gpu 0` 在 PyTorch 偵測到 CUDA 可用時選擇可見 GPU 0，否則使用 CPU；`--gpu -1` 指定使用 CPU。
 
 Wikipedia 與 Bitcoin-Alpha 可調整資料集名稱及實驗名稱；MOOC 使用 `train_segmented_research.py`，並將確認開關改為 `AHEAD_SEGMENTED_TRAINING_CONFIRM=1`。模型選擇資訊保存於各 seed 的 `selection.json` 與 `selection_complete.json`。
 
 開發集推論程式為 `src/run_degree_development.py`，MOOC 使用 `src/run_segmented_development.py`；`src/evaluate_shared_research.py` 為測試集評估程式。這些程式需要相符的實驗檔案與 checkpoint，並會寫入結果，請使用獨立的實驗目錄。
 
-> 注意：原作者的 `src/train.py` 可能刪除 checkpoint，且可能依 Test 表現保存模型。`src/eval_degree_ablation.py` 使用固定輸出路徑，可能覆寫結果。請勿直接在既有實驗目錄執行這些程式。
+> 注意：衍生自原始 AHEAD 的訓練程式 `src/train.py` 可能刪除 checkpoint，且可能依 Test 表現保存模型。`src/eval_degree_ablation.py` 使用固定輸出路徑，可能覆寫結果。請勿直接在既有實驗目錄執行這些程式。
 
 ## 實驗重現與測試
 
@@ -216,7 +224,7 @@ PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES='' python3 -B -m unittest discove
 
 ## 參考資料與授權
 
-本專案基於 [AHEAD 論文](https://doi.org/10.1145/3770855.3817610) 與 [原作者程式](https://github.com/YayaLee666/AHEAD)，參考版本為 `b9d5a805143aa280a665a11d6bdd53d211943888`。`src/README.md` 保留原作者說明。本研究聚焦 GraphMixer 的度數校正，不涵蓋原論文所有模型與實驗。
+本專案基於 [AHEAD 論文](https://doi.org/10.1145/3770855.3817610) 與 [原作者程式](https://github.com/YayaLee666/AHEAD)，參考版本為 `b9d5a805143aa280a665a11d6bdd53d211943888`。本研究聚焦 GraphMixer 的度數校正，不涵蓋原論文所有模型與實驗。
 
 JODIE：S. Kumar, X. Zhang, J. Leskovec, [Predicting Dynamic Embedding Trajectory in Temporal Interaction Networks](https://doi.org/10.1145/3292500.3330895), KDD 2019, §4.2。
 
