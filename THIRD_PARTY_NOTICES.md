@@ -2,11 +2,11 @@
 
 ## AHEAD
 
-The project includes AHEAD source and separate local modifications. The AHEAD notice does not claim that the original author wrote all local additions; rights and licensing for local additions must be determined by their rightsholders. Original repository: https://github.com/YayaLee666/AHEAD ; compared revision b9d5a805143aa280a665a11d6bdd53d211943888. The complete original AHEAD MIT license is retained unmodified in `src/LICENSE` and copied to the repository-root `LICENSE`.
+The project includes AHEAD source and separate local modifications. The original AHEAD license covers upstream code. Rights and licensing for project-specific additions remain subject to the decisions of their respective rightsholders. Original repository: https://github.com/YayaLee666/AHEAD ; compared revision b9d5a805143aa280a665a11d6bdd53d211943888. The complete original AHEAD MIT license is retained unmodified in `src/LICENSE` and copied to the repository-root `LICENSE`.
 
 ## DyGLib: source correspondence and MIT notice
 
-The AHEAD-version files `src/utils/DataLoader.py`, `src/models/GraphMixer.py`, `src/utils/utils.py`, and `src/evaluate_models_utils.py` contain substantial matching code blocks compared with the public DyGLib repository at revision `3aacc36b94b8d2d8293d70a74fdf6d39089b4163`: https://github.com/yule-BUAA/DyGLib/tree/3aacc36b94b8d2d8293d70a74fdf6d39089b4163 . AHEAD also references DyGLib for GraphMixer. Correspondence is evidenced by comparison; the precise historical chain and full attribution of every file remain unverified. The following MIT notice is preserved as a conservative attribution and does not assert that every file originates in DyGLib. Current master license checked at https://github.com/yule-BUAA/DyGLib/blob/master/LICENSE ; the license file at the compared historical commit could not be accessed during this audit, so its historical content is not claimed as verified.
+The AHEAD-version files `src/utils/DataLoader.py`, `src/models/GraphMixer.py`, `src/utils/utils.py`, and `src/evaluate_models_utils.py` contain substantial matching code blocks compared with the public DyGLib repository at revision `3aacc36b94b8d2d8293d70a74fdf6d39089b4163`: https://github.com/yule-BUAA/DyGLib/tree/3aacc36b94b8d2d8293d70a74fdf6d39089b4163 . AHEAD also references DyGLib for GraphMixer. The comparison establishes code similarity, but not the complete history or attribution of every file. The following MIT notice is preserved as a conservative attribution and does not assert that every file originates in DyGLib. The current master license is available at https://github.com/yule-BUAA/DyGLib/blob/master/LICENSE ; the license file at the compared historical commit could not be accessed; the license at that revision remains unverified.
 
 ```text
 MIT License
@@ -34,7 +34,7 @@ SOFTWARE.
 
 ## GraphMixer and JODIE
 
-GraphMixer publication and original project: https://github.com/CongWeilin/GraphMixer . This package includes a GraphMixer implementation already present in AHEAD, with substantial similarity to the DyGLib implementation. No direct-copy chain to the GraphMixer author repository was established, and its repository license was not established by this check; do not infer that DyGLib's MIT license grants rights to unrelated code.
+GraphMixer publication and original project: https://github.com/CongWeilin/GraphMixer . This package includes a GraphMixer implementation already present in AHEAD, with substantial similarity to the DyGLib implementation. No direct-copy chain to the GraphMixer author repository was established, and its repository license remains unverified; do not infer that DyGLib's MIT license grants rights to unrelated code.
 
 JODIE project: https://github.com/claws-lab/jodie ; JODIE's repository provides an MIT code license. JODIE is cited here as a data source and research reference; no direct copying of JODIE repository code into this package was verified. The JODIE code license does not establish redistribution rights for its datasets. Dataset sources and unresolved redistribution conditions are described in `README.md`.
 
