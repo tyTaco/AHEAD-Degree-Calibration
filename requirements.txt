@@ -1,0 +1,9 @@
+# 原研究環境版本參考；未在乾淨環境驗證。
+# torch 請先依平台與 GPU/CPU 從 https://pytorch.org/get-started/locally/ 安裝；
+# 原研究記錄版本 torch 2.6.0+cu126，不能保證與其他平台一致。
+numpy==1.26.4
+pandas==2.2.3
+scipy==1.13.1
+scikit-learn==1.5.2
+networkx==3.7
+tqdm==4.67.1

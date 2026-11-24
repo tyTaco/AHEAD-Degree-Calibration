@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "run_id": "digg_shared_dev_5seed_fixed100_20261121",
+  "dataset": "digg",
+  "input_provenance_sha256": "bec348f3f69b4a36e5e0903e37fb00fe74502ef1f76a9d91803f34351156b2ac",
+  "selection_seal_sha256": "8e94b7a3d2fe7845dcfb4aa8e4239dd3b8a2ee05f242bc1c3d644b3948b0e87f",
+  "development_code_sha256": {
+    "run_degree_development.py": "0e6bde6cf254792e23dcb521007815baa85ab8ebd6b92e6efd8a61528bc39d52",
+    "degree_development.py": "e52d6258cd3ce0593a5f0b029bfacde6e2475a2e0d0e45516791f5ae487a7d0a",
+    "degree_ecdf_prototype.py": "ec83b9b6e77d5e37e3b417ccf0b1a9366534b911397988aa0db0290004ef960c"
+  },
+  "segments": {
+    "train": [
+      0,
+      39432
+    ],
+    "selection": [
+      39432,
+      43814
+    ],
+    "reference": [
+      43814,
+      52576
+    ],
+    "development": [
+      52576,
+      61339
+    ],
+    "old_test": [
+      61339,
+      87627
+    ]
+  },
+  "model_ready_time": 1225973412.0,
+  "degree_cap": 20,
+  "prior_strength": 50.0,
+  "batch_size": 200,
+  "last_batch_sizes": {
+    "selection": 182,
+    "reference": 162,
+    "development": 163
+  },
+  "scoring_protocol": "offline_batch_delayed_within_batch_future_candidates",
+  "score_time_semantics": "last_event_timestamp_in_each_batch",
+  "old_test_labels_read": false,
+  "reference_labels_read": false,
+  "development_labels_used_for_metrics": true,
+  "selection_policies": [
+    "val_auroc",
+    "train_loss"
+  ],
+  "methods": [
+    "none",
+    "original",
+    "continuous",
+    "degree_ecdf_prototype"
+  ]
+}

@@ -1,0 +1,262 @@
+{
+  "num_runs": 5,
+  "summary": {
+    "val_auroc": {
+      "none": {
+        "AUROC": {
+          "mean": 0.6011746787417804,
+          "sample_sd": 0.02187899953281449
+        },
+        "AP": {
+          "mean": 0.06112989969147249,
+          "sample_sd": 0.004375120553376439
+        },
+        "PR_AUC": {
+          "mean": 0.060584782916062466,
+          "sample_sd": 0.004338451656258748
+        }
+      },
+      "original": {
+        "AUROC": {
+          "mean": 0.5677073092135064,
+          "sample_sd": 0.022513265113000072
+        },
+        "AP": {
+          "mean": 0.056915769139985806,
+          "sample_sd": 0.0037886857547287053
+        },
+        "PR_AUC": {
+          "mean": 0.05639023527430855,
+          "sample_sd": 0.0037474674659620445
+        }
+      },
+      "continuous": {
+        "AUROC": {
+          "mean": 0.5677882051796523,
+          "sample_sd": 0.026865792276025143
+        },
+        "AP": {
+          "mean": 0.05649533014011502,
+          "sample_sd": 0.0040503698740092155
+        },
+        "PR_AUC": {
+          "mean": 0.05598673922648869,
+          "sample_sd": 0.003994269452992159
+        }
+      },
+      "degree_ecdf_prototype": {
+        "AUROC": {
+          "mean": 0.48739640239435034,
+          "sample_sd": 0.013027570368443138
+        },
+        "AP": {
+          "mean": 0.0450673332691773,
+          "sample_sd": 0.002931080727784855
+        },
+        "PR_AUC": {
+          "mean": 0.04445497511228201,
+          "sample_sd": 0.0028908614158562294
+        }
+      }
+    },
+    "train_loss": {
+      "none": {
+        "AUROC": {
+          "mean": 0.5163243864401215,
+          "sample_sd": 0.03382637242271067
+        },
+        "AP": {
+          "mean": 0.05125472524563589,
+          "sample_sd": 0.0027252103364602885
+        },
+        "PR_AUC": {
+          "mean": 0.050634776458162556,
+          "sample_sd": 0.002713619983777861
+        }
+      },
+      "original": {
+        "AUROC": {
+          "mean": 0.44569111177992404,
+          "sample_sd": 0.03093046279914743
+        },
+        "AP": {
+          "mean": 0.0452651545292194,
+          "sample_sd": 0.0017519020198025034
+        },
+        "PR_AUC": {
+          "mean": 0.04466435797411013,
+          "sample_sd": 0.0017238651731394132
+        }
+      },
+      "continuous": {
+        "AUROC": {
+          "mean": 0.4664812230764788,
+          "sample_sd": 0.03321533537802706
+        },
+        "AP": {
+          "mean": 0.04675426639134699,
+          "sample_sd": 0.002085938562981896
+        },
+        "PR_AUC": {
+          "mean": 0.046147890955922824,
+          "sample_sd": 0.0020525802317287204
+        }
+      },
+      "degree_ecdf_prototype": {
+        "AUROC": {
+          "mean": 0.42797708403634693,
+          "sample_sd": 0.008984287489982909
+        },
+        "AP": {
+          "mean": 0.036638403240542315,
+          "sample_sd": 0.0007486910725681316
+        },
+        "PR_AUC": {
+          "mean": 0.036578311396865563,
+          "sample_sd": 0.0008617818033135889
+        }
+      }
+    }
+  },
+  "paired_delta_vs_none": {
+    "val_auroc": {
+      "none": {
+        "AUROC": {
+          "mean": 0.0,
+          "sample_sd": 0.0
+        },
+        "AP": {
+          "mean": 0.0,
+          "sample_sd": 0.0
+        },
+        "PR_AUC": {
+          "mean": 0.0,
+          "sample_sd": 0.0
+        }
+      },
+      "original": {
+        "AUROC": {
+          "mean": -0.033467369528274095,
+          "sample_sd": 0.008485810722114668
+        },
+        "AP": {
+          "mean": -0.004214130551486682,
+          "sample_sd": 0.0017007335617381185
+        },
+        "PR_AUC": {
+          "mean": -0.004194547641753914,
+          "sample_sd": 0.0016878605492318093
+        }
+      },
+      "continuous": {
+        "AUROC": {
+          "mean": -0.033386473562128184,
+          "sample_sd": 0.015325843786417947
+        },
+        "AP": {
+          "mean": -0.004634569551357473,
+          "sample_sd": 0.0025892337725564566
+        },
+        "PR_AUC": {
+          "mean": -0.0045980436895737735,
+          "sample_sd": 0.00256603993038813
+        }
+      },
+      "degree_ecdf_prototype": {
+        "AUROC": {
+          "mean": -0.11377827634743012,
+          "sample_sd": 0.009266313055713035
+        },
+        "AP": {
+          "mean": -0.016062566422295192,
+          "sample_sd": 0.001531352359293303
+        },
+        "PR_AUC": {
+          "mean": -0.016129807803780455,
+          "sample_sd": 0.00156133444233385
+        }
+      }
+    },
+    "train_loss": {
+      "none": {
+        "AUROC": {
+          "mean": 0.0,
+          "sample_sd": 0.0
+        },
+        "AP": {
+          "mean": 0.0,
+          "sample_sd": 0.0
+        },
+        "PR_AUC": {
+          "mean": 0.0,
+          "sample_sd": 0.0
+        }
+      },
+      "original": {
+        "AUROC": {
+          "mean": -0.07063327466019739,
+          "sample_sd": 0.0042952325638775345
+        },
+        "AP": {
+          "mean": -0.0059895707164164865,
+          "sample_sd": 0.0010239607541833733
+        },
+        "PR_AUC": {
+          "mean": -0.005970418484052428,
+          "sample_sd": 0.0010213185645908192
+        }
+      },
+      "continuous": {
+        "AUROC": {
+          "mean": -0.04984316336364266,
+          "sample_sd": 0.0027924012374483287
+        },
+        "AP": {
+          "mean": -0.004500458854288895,
+          "sample_sd": 0.0007257490933927212
+        },
+        "PR_AUC": {
+          "mean": -0.004486885502239736,
+          "sample_sd": 0.0007238950618472372
+        }
+      },
+      "degree_ecdf_prototype": {
+        "AUROC": {
+          "mean": -0.0883473024037745,
+          "sample_sd": 0.02548007874467212
+        },
+        "AP": {
+          "mean": -0.014616322005093574,
+          "sample_sd": 0.002082202999622794
+        },
+        "PR_AUC": {
+          "mean": -0.014056465061296996,
+          "sample_sd": 0.002162060538321955
+        }
+      }
+    }
+  },
+  "protocol_sha256": "a268420b0205e894d528c2ffe823b27abb8325071fabb062cf97ad4d03042c25",
+  "artifact_sha256": {
+    "val_auroc_seed0_metrics.json": "7e57fa1bea921370876e20bc4d37a43c3564efbfcd27ed8d644405106db03fb0",
+    "val_auroc_seed0_scores.npz": "67164aec0ae45db12889583444aa572cdb225ca0bd66b64948bc3c3b04595900",
+    "train_loss_seed0_metrics.json": "24c7200f72a91beae4e406250017c75da51b930a2dd89d037eddd425257b4fc3",
+    "train_loss_seed0_scores.npz": "7077e0d98e5e81890755ac3eeb32d9405e9d01d089a30f45581ccb1ebc710157",
+    "val_auroc_seed1_metrics.json": "e21a6a715a01616b988dc3eb6c540edd157a7fa5028422ffc6ba24f1b81a656a",
+    "val_auroc_seed1_scores.npz": "35d3311a92e985cad717297e25a4498e0bfdcd8f095c9b2b62e58df47612bcf2",
+    "train_loss_seed1_metrics.json": "e4169d86a118654de1d6afb4615a825f38a3a498339e8672506dc3630ece2896",
+    "train_loss_seed1_scores.npz": "ce6529e972a73fa62f0ab8985041c1ff4b9b7406d0dc24441a88deeb2cf98c1f",
+    "val_auroc_seed2_metrics.json": "619c48c32a56970e2e8c0d751b01b5f0ff2928279d884b5bea43a5a2aec2b0f2",
+    "val_auroc_seed2_scores.npz": "1e2f7dd6e15d99495523f46eddb098d3504a4cbe36490be8ac6e720a8d42cb52",
+    "train_loss_seed2_metrics.json": "72226dc5b06fe2ac3bc734bd758ce8904c699bff538552f06dbfad1e017327d6",
+    "train_loss_seed2_scores.npz": "e862dd4a015292c5679b775073b1ad6b4d9708c3b5532dbc31589314142ceab8",
+    "val_auroc_seed3_metrics.json": "281bb696b439b5ae6b11b78aede5b321184fb0aab7dab479d7d43a280c2d6967",
+    "val_auroc_seed3_scores.npz": "61f8109900242b6548dfe162f5f39f79a0a813198cb68c019f6e3dd53c33fdce",
+    "train_loss_seed3_metrics.json": "2008288c2aacfc62ac9a8839b1b2ace75fae9985345b2e5603c2696adabf67a1",
+    "train_loss_seed3_scores.npz": "1947228683ff3c450822e98fc91fec7e244406f7cc4bdda3539b6feac52741a1",
+    "val_auroc_seed4_metrics.json": "871732468ee616a71f243877bf4713e4593a6ab687898adc3f72eb49a6ac0909",
+    "val_auroc_seed4_scores.npz": "db88bb1c6e6b02d8195ba0d5736037d9c6e51c98a39659f30bea0d183100a8ea",
+    "train_loss_seed4_metrics.json": "e3f8235a4d97d45f52131b43a26d69472bac5d4804ddb223bd477b287e1063ec",
+    "train_loss_seed4_scores.npz": "4f1196e20320811c53c15fe134544724805365d90834778c1b86eb6724224aaa"
+  }
+}

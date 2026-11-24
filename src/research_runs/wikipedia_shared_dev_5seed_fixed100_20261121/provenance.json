@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "protocol": "shared_trajectory_fixed_epochs",
+  "dataset": "wikipedia",
+  "calibration_mode": "original",
+  "configuration": {
+    "dataset_name": "wikipedia",
+    "batch_size": 200,
+    "model_name": "AHEADGraphMixer",
+    "gpu": 0,
+    "num_neighbors": 20,
+    "sample_neighbor_strategy": "recent",
+    "time_scaling_factor": 1e-06,
+    "num_walk_heads": 8,
+    "num_heads": 2,
+    "num_layers": 2,
+    "walk_length": 1,
+    "time_gap": 2000,
+    "time_feat_dim": 100,
+    "position_feat_dim": 172,
+    "patch_size": 1,
+    "channel_embedding_dim": 50,
+    "max_input_sequence_length": 32,
+    "learning_rate": 0.0001,
+    "dropout": 0.1,
+    "num_epochs": 100,
+    "optimizer": "Adam",
+    "weight_decay": 0.0,
+    "patience": 20,
+    "val_ratio": 0.05,
+    "test_ratio": 0.5,
+    "num_runs": 5,
+    "test_interval_epochs": 3,
+    "load_best_configs": false,
+    "use_random_projection": false,
+    "rp_num_layer": 3,
+    "rp_time_decay_weight": 1e-07,
+    "rp_dim_factor": 10,
+    "encode_not_rp": false,
+    "decode_not_rp": false,
+    "rp_not_scale": false,
+    "not_encode": false,
+    "enforce_dim": -1,
+    "rp_use_matrix": false,
+    "anomaly_threshold": 1,
+    "save_pseudo_grads_epoch_interval": 10,
+    "proto_reg_factor": 0.05,
+    "div_reg_factor": 0.05,
+    "degree_threshold": 50,
+    "burst_count_threshold": 5,
+    "burst_time_window": 3600,
+    "loss_type": "infonce",
+    "temperature": 0.1,
+    "grad_percentile_threshold": 95.0,
+    "input_dim": 128,
+    "hidden_dim": 258,
+    "n_layer": 6,
+    "n_heads": 4,
+    "drop_out": 0.4,
+    "use_kan": false,
+    "kan_grid_size": 3,
+    "kan_spline_order": 3,
+    "token_sparsity": 0.01,
+    "channel_sparsity": 0.01,
+    "num_hard_negatives": 0,
+    "lambda_thresh_loss": 0.5,
+    "partition_epsilon": 0.1,
+    "alpha_refurbish": 0.1,
+    "num_fft_batches": 100,
+    "device": "cuda:0"
+  },
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "torch": "2.6.0+cu126",
+  "numpy": "1.26.4",
+  "pandas": "2.2.3",
+  "scikit_learn": "1.5.2",
+  "files": {
+    "train_research.py": {
+      "sha256": "0ced7874215f8409dcad306778518cee51ad3c4b2071c1653fc55cc8d5cceb4a",
+      "bytes": 24306
+    },
+    "evaluate_research.py": {
+      "sha256": "2b51b8ffbf2df998e2c832c80b8d4277fd3b7f2e5d224079dcbff111b5e31c6c",
+      "bytes": 14536
+    },
+    "models/AHEADGraphMixer.py": {
+      "sha256": "d644652b07fb28050c004254f2b456705020af5d89ea439ec871ccbc82f94d48",
+      "bytes": 20657
+    },
+    "models/PartitionedGraphMixer.py": {
+      "sha256": "fd2b6d967acb831a946a8c746c8fbfa82d592e57e5538eb258d912783722c0f7",
+      "bytes": 21975
+    },
+    "models/GraphMixer.py": {
+      "sha256": "0a36beaf2d3ee331977c3b3f488af6b94256cb0434e1175adb24cdca8a8a09fb",
+      "bytes": 12616
+    },
+    "models/Memorymodel.py": {
+      "sha256": "ff3b269193384655c873929daebd8dc676d1e8c33249b2f6975f0dc530d8b8a2",
+      "bytes": 16134
+    },
+    "models/modules/__init__.py": {
+      "sha256": "737e9fe1868a8de7c3a3ec1e6b65dcb28e97b114894b4c91719ca63101f008e3",
+      "bytes": 350
+    },
+    "models/modules/time_encoding.py": {
+      "sha256": "879b36d336a1fc18bb0598d060dae835351811303236542c5dec9cd0872696f5",
+      "bytes": 1653
+    },
+    "utils/DataLoader.py": {
+      "sha256": "70500e543d20b02708424576d15cd063dd71854b11f70f8b424d7afafc8bc2ef",
+      "bytes": 20049
+    },
+    "utils/EarlyStopping.py": {
+      "sha256": "854bc3d074b6fbb6a6f026884712bc3212865ed2c74e7764796d29502b9f2714",
+      "bytes": 4174
+    },
+    "utils/load_configs.py": {
+      "sha256": "d1b6b8d4f0c615fe53d1cc81ea2dd9819881d11fcf3bf7443546d07a59ccc6a8",
+      "bytes": 35443
+    },
+    "utils/utils.py": {
+      "sha256": "dacd6cb2fd1b7251105cf517b2f94d4de09aef42afd357dd0ddcd830bf2a2f26",
+      "bytes": 33728
+    },
+    "utils/metrics.py": {
+      "sha256": "2788c05e976acfcac2a8c0e4d40db22516fe38481fb1f0c85ce80d8fa194878f",
+      "bytes": 4614
+    },
+    "evaluate_models_utils.py": {
+      "sha256": "da7191ae39b4e3b2d9f7a60f05d5454a9784385bbffa5a48150fd405c2166b8d",
+      "bytes": 17265
+    },
+    "processed_data/wikipedia/ml_wikipedia.csv": {
+      "sha256": "2c039b97e81a6d0bb097f7fc392d26f51d1a328a0259ab44d3a414f02d4ff0bf",
+      "bytes": 4317518
+    },
+    "processed_data/wikipedia/ml_wikipedia.npy": {
+      "sha256": "cb36f4746e148e63a5754152046f40f7deb256143cd1a0058e26f799f71962e1",
+      "bytes": 108342928
+    },
+    "processed_data/wikipedia/ml_wikipedia_node.npy": {
+      "sha256": "e44f2ee337c69ab3e00ea7e0f73b6343ac69d202d2ca3def097989559eee006d",
+      "bytes": 6348992
+    },
+    "train_shared_research.py": {
+      "sha256": "13d32f7abd317cfe6eca6078516c785d434737e90b91428c154d278243a0c6e2",
+      "bytes": 11556
+    },
+    "evaluate_shared_research.py": {
+      "sha256": "f9f5ce0ac9664017a22bf63242cb36ef1926df5431de48cdfcddf21ca01a81b5",
+      "bytes": 10257
+    }
+  }
+}

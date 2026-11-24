@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "run_id": "mooc_segmented_dev_5seed_fixed100_20261121",
+  "dataset": "mooc",
+  "input_provenance_sha256": "2bec0f420e803b00e6fbd82b99b1b10c3483665cab22ced19beae5291aebae02",
+  "selection_seal_sha256": "8c4fe6efddd5db23c2f2159fc1910d48390932a49056373d87a3e7df0078f67a",
+  "development_code_sha256": {
+    "run_segmented_development.py": "792b4e85f55f3d80322f02f8d4d0da937df63627ebedc27957b2b7dab633dfd1",
+    "degree_development.py": "e52d6258cd3ce0593a5f0b029bfacde6e2475a2e0d0e45516791f5ae487a7d0a",
+    "degree_ecdf_prototype.py": "ec83b9b6e77d5e37e3b417ccf0b1a9366534b911397988aa0db0290004ef960c"
+  },
+  "segments": {
+    "train": [
+      0,
+      185287
+    ],
+    "selection": [
+      185287,
+      205875
+    ],
+    "reference": [
+      205875,
+      247049
+    ],
+    "development": [
+      247049,
+      288224
+    ],
+    "old_test": [
+      288224,
+      411749
+    ]
+  },
+  "model_ready_time": 1458102.0,
+  "degree_cap": 20,
+  "prior_strength": 50.0,
+  "batch_size": 200,
+  "last_batch_sizes": {
+    "selection": 188,
+    "reference": 174,
+    "development": 175
+  },
+  "scoring_protocol": "offline_batch_delayed_within_batch_future_candidates",
+  "score_time_semantics": "last_event_timestamp_in_each_batch",
+  "label_scope": "only_D_label_column_materialized_by_development_evaluator",
+  "csv_byte_access": "other_rows_may_be_scanned_or_buffered",
+  "training_label_scope": "B_label_column_materialized",
+  "development_labels_used_for_metrics": true,
+  "selection_policies": [
+    "val_auroc",
+    "train_loss"
+  ],
+  "methods": [
+    "none",
+    "original",
+    "continuous",
+    "degree_ecdf_prototype"
+  ]
+}

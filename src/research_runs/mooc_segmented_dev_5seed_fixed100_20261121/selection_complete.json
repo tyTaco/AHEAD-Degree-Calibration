@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "protocol": "segmented_shared_trajectory_v1",
+  "provenance_sha256": "2bec0f420e803b00e6fbd82b99b1b10c3483665cab22ced19beae5291aebae02",
+  "runs": [
+    {
+      "seed": 0,
+      "selection_sha256": "27326b394cbd2c63ef111366c4df327c3e30560d3005e7f8cb730a78e1e713b7",
+      "policies": {
+        "train_loss": {
+          "epoch": 2,
+          "score": 8.283082989298666,
+          "checkpoint": "train_loss_epoch0002.pkl",
+          "checkpoint_sha256": "73135ae1756c8965ca37ff0d0848b3d669d7c99e363c8f6fc2a44f8426905314",
+          "validation_labels_used_for_selection": false
+        },
+        "val_auroc": {
+          "epoch": 5,
+          "score": 0.5564220279793689,
+          "checkpoint": "val_auroc_epoch0005.pkl",
+          "checkpoint_sha256": "830073b92d9acf71019391f37b5a2f97768a1a53aae930c31191ff7cef51221b",
+          "validation_labels_used_for_selection": true
+        }
+      }
+    },
+    {
+      "seed": 1,
+      "selection_sha256": "d01fc207a1fc459d1d75232c32e89463f91eae4ab82e3e3343e080b747ea2093",
+      "policies": {
+        "train_loss": {
+          "epoch": 2,
+          "score": 8.268205791358167,
+          "checkpoint": "train_loss_epoch0002.pkl",
+          "checkpoint_sha256": "110fcc40f73ae269725d5d78567df962fdbba18f1051c00b90c1ed53ddb47ba1",
+          "validation_labels_used_for_selection": false
+        },
+        "val_auroc": {
+          "epoch": 8,
+          "score": 0.5369418647780476,
+          "checkpoint": "val_auroc_epoch0008.pkl",
+          "checkpoint_sha256": "3f4bacf8480131b5f4fd1976fc7e7c94a30d6e8c59569ff2a781a6736365dbe8",
+          "validation_labels_used_for_selection": true
+        }
+      }
+    },
+    {
+      "seed": 2,
+      "selection_sha256": "20788938b0d39edaa8e2e830c7d8b552a95fe983589a9eeaff25678e0e184212",
+      "policies": {
+        "train_loss": {
+          "epoch": 2,
+          "score": 8.283572044701767,
+          "checkpoint": "train_loss_epoch0002.pkl",
+          "checkpoint_sha256": "7dd7c8ea4b6231bf0b67b98fd63965d820a6e6b3a9f87e369683bcdd70b57dc6",
+          "validation_labels_used_for_selection": false
+        },
+        "val_auroc": {
+          "epoch": 6,
+          "score": 0.5186565983861824,
+          "checkpoint": "val_auroc_epoch0006.pkl",
+          "checkpoint_sha256": "5c07f072d2ff5f355571b96efa71bd05a6f24f31aa35de76a5acb76d7c695ffc",
+          "validation_labels_used_for_selection": true
+        }
+      }
+    },
+    {
+      "seed": 3,
+      "selection_sha256": "a0a27d31b6d26d179c84df88aa09bb9ac8305f77a6e547e17fc2bf4c272cab40",
+      "policies": {
+        "train_loss": {
+          "epoch": 2,
+          "score": 8.280728062894095,
+          "checkpoint": "train_loss_epoch0002.pkl",
+          "checkpoint_sha256": "b10e550d0211a47909b8bae8898df0e5b869ef93970890e7ba73e1052339c59c",
+          "validation_labels_used_for_selection": false
+        },
+        "val_auroc": {
+          "epoch": 5,
+          "score": 0.5483159891105809,
+          "checkpoint": "val_auroc_epoch0005.pkl",
+          "checkpoint_sha256": "d4e8471e5b729862b6ff94af2d77794d761fa71438897d2debdfb6f8545b0755",
+          "validation_labels_used_for_selection": true
+        }
+      }
+    },
+    {
+      "seed": 4,
+      "selection_sha256": "633a4f3d86e33d2fda2687748430f39f9d1835daff00e5680731d346e5a88384",
+      "policies": {
+        "train_loss": {
+          "epoch": 2,
+          "score": 8.265299777511382,
+          "checkpoint": "train_loss_epoch0002.pkl",
+          "checkpoint_sha256": "c020849bdcec5af6cdd8cf2a78a41e3373d19ec52f073e3e27ea3e5e54abcd65",
+          "validation_labels_used_for_selection": false
+        },
+        "val_auroc": {
+          "epoch": 6,
+          "score": 0.548598442169206,
+          "checkpoint": "val_auroc_epoch0006.pkl",
+          "checkpoint_sha256": "e3842f26f5fd89d9cb6e7855654ee963075f0ccdaa28f7a9d077fb5783dfac10",
+          "validation_labels_used_for_selection": true
+        }
+      }
+    }
+  ]
+}
