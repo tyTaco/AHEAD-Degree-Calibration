@@ -128,7 +128,7 @@ MOOC 在此 D 區間的低度數組沒有正類事件。對低度數事件套用
 | Python／PyTorch | Python 3.12.3；PyTorch 2.6.0+cu126，PyTorch CUDA build **12.6** |
 | 套件 | NumPy 1.26.4、SciPy 1.13.1、pandas 2.2.3、scikit-learn 1.5.2；其餘參考 `requirements.txt` |
 
-如需執行模型或評估指標驗證，請在 Linux 專案根目錄建立虛擬環境。以下安裝指令依據本研究使用的套件版本整理；全新環境的安裝與完整執行仍待驗證：
+如需執行模型或評估指標驗證，請在 Linux 專案根目錄建立虛擬環境。以下先列出原研究 CUDA 版本的安裝方式。本輪外部安裝驗證採用下方的 CPU-only 版本。
 
 ```bash
 python3.12 -m venv .venv
@@ -139,7 +139,7 @@ python -m pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/
 python -m pip install -r requirements.txt
 ```
 
-CPU-only 可改用下列指令**取代**上方的 CUDA PyTorch 安裝命令，再執行相同的 `pip install -r requirements.txt`；新環境安裝與 CPU-only build 本身尚未驗證，歷史 seal 的精確 PyTorch 版本也可能不同：
+CPU-only 可使用下列指令**取代**上方的 CUDA PyTorch 安裝命令，再執行相同的 `pip install -r requirements.txt`。[下方固定提交的外部驗證](#驗證與研究限制)使用全新 Python 3.12.3 venv，成功安裝 PyTorch 2.6.0+cpu 與 requirements，並通過 `pip check`。重讀歷史封存時仍須留意其記錄的 PyTorch 版本。
 
 ```bash
 python -m pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cpu
@@ -149,7 +149,7 @@ python -m pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/
 
 ## 資料準備與前處理
 
-候選版本不含原始／處理後資料、checkpoint 或逐事件 scores。下載前請查核來源使用及再散布條件；可以下載不代表允許重新散布。本節指令在**專案根目錄**執行，`work/` 為本地工作資料，不納入版本控制。
+公開版本不含原始／處理後資料、checkpoint 或逐事件 scores。下載前請查核來源使用及再散布條件；可以下載不代表允許重新散布。本節指令在**專案根目錄**執行，`work/` 為本地工作資料，不納入版本控制。
 
 | 資料集 | 公開原始資料 | 本研究標籤與狀態 |
 |---|---|---|
@@ -158,7 +158,7 @@ python -m pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/
 | MOOC | [SNAP JODIE CSV](https://snap.stanford.edu/jodie/mooc.csv) | 退課相關最後互動代理；公開來源至歷史三輸入 PASS-BITWISE，並非 AHEAD 論文的六個資料集之一 |
 | Digg | [KONECT reply network](https://konect.cc/networks/munmun_digg_reply/) | 歷史資料的合成異常注入完整規則未知；前處理 **BLOCKED**，兩模式均拒絕生成 |
 
-公開檔案可能更新；Historical 模式會嚴格核對來源及輸出 SHA-256。上列三個 PASS-BITWISE 是原研究環境的實際驗證，不保證其他平台重新生成 NPY 時逐位一致，也不表示找回全部歷史原始程式。
+公開檔案可能更新。Historical 模式會嚴格核對來源及輸出 SHA-256。[固定提交的外部驗證](#驗證與研究限制)確認三個資料集各三個模型輸入，共九檔達 PASS-BITWISE。此結果適用於受測來源與環境，歷史原轉換程式的來源仍未全部確認。
 
 下載範例（Wikipedia 約 560 MB、MOOC 約 41 MB）：
 
@@ -187,7 +187,7 @@ Wikipedia 使用 `DATASET=wikipedia` 和 `SOURCE="$PWD/work/raw/wikipedia.csv"`�
 
 ## 新實驗：訓練、出分與六方法
 
-以下沿用前節 `DATASET`、`SOURCE`、`PREP`；每個 run 需要不同的 `RUN_ID`，工作區不可在原始 `src/` 下。GPU 需要自行安裝相容 PyTorch／驅動；原研究環境使用 GPU，但新整合入口的 GPU 執行尚未實測。以下以 CPU 為例：
+以下沿用前節 `DATASET`、`SOURCE`、`PREP`；每個 run 需要不同的 `RUN_ID`，工作區不可在原始 `src/` 下。原研究環境使用 GPU，新整合入口的 GPU 路徑尚無本輪外部驗證。下列 Historical experiment 命令會啟動完整訓練。若要先試跑，可使用下方 Bitcoin-Alpha 的 2 epochs 範例。
 
 ```bash
 RUN_ID=my_mooc_run_001
@@ -231,6 +231,36 @@ python -B src/evaluate_preprocessed_calibration.py --project-root "$PROJECT" \
 
 新 scores 在實際推論 batch 保存 event ID；舊 scores 缺 event ID，只有顯式 `--allow-legacy-event-alignment` 才會以 timestamp 限制核對。重算 C 方法會用 C 標籤；實際標籤發布時間未知，D 已探索，不是獨立 Test。
 
+### Bitcoin-Alpha 真實資料 CPU 試跑
+
+先依「資料準備與前處理」重建 Bitcoin-Alpha 的 Historical 模型輸入，使用下列 `SOURCE`、`PREP` 路徑，並以可信紀錄核對 manifest SHA-256。此例是[固定提交的外部驗證](#驗證與研究限制)所用的小規模可行性設定。它讀取 Historical 資料，以 Custom experiment 執行 seed 0、2 epochs、batch 200，然後在 CPU 對兩種選模策略出分並計算六種校正方法。完整歷史實驗尚未重新執行。
+
+```bash
+DATASET=bitcoinalpha
+SOURCE="$PWD/work/raw/soc-sign-bitcoinalpha.csv.gz"
+PREP="$PWD/work/prepared/bitcoinalpha_historical"
+RUN_ID=bitcoinalpha_cpu_2epochs_001  # 每次使用尚未存在的 run ID
+mkdir -p work/runs
+python -B src/prepare_reproducible.py --dataset "$DATASET" --mode historical \
+  --source "$SOURCE" --destination "$PREP" --verify-only
+MANIFEST=$(python -c 'import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "$PREP/reproducibility_manifest.json")
+CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+AHEAD_INTEGRATION_TRAINING_CONFIRM=1 python -B src/train_preprocessed_research.py \
+  --dataset "$DATASET" --data-mode historical --source "$SOURCE" --data-dir "$PREP" \
+  --manifest-sha256 "$MANIFEST" --experiment-mode custom --device cpu \
+  --run-id "$RUN_ID" --workspace-parent "$PWD/work/runs" \
+  --num-runs 1 --num-epochs 2 --batch-size 200 --num-neighbors 20 --time-gap 2000 \
+  --learning-rate 0.0001 --optimizer Adam --execute
+PROJECT="$PWD/work/runs/$RUN_ID/project"
+RESULT="$PWD/work/runs/$RUN_ID/calibration_result.json"
+CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+python -B src/score_preprocessed_research.py --project-root "$PROJECT" --source "$SOURCE" \
+  --run-id "$RUN_ID" --dataset "$DATASET" --seeds 0 --policies val_auroc train_loss \
+  --methods all --mode historical --output "$RESULT" --confirm-scores
+```
+
+出分的 `--mode historical` 使用歷史校正參數。訓練仍是 2 epochs 的 Custom experiment。下節可用 `$RESULT` 產生統計摘要。
+
 ## 結果統計
 
 對已保存的 per-run JSON，執行目錄為專案根目錄：
@@ -240,13 +270,13 @@ python -B src/summarize_calibration_results.py --input "$RESULT" \
   --output "$PWD/work/runs/$RUN_ID/statistics.json"
 ```
 
-可加 `--datasets mooc --seeds 0 --policies val_auroc --methods none original fixed_1_1` 選擇子集，或在 `--input` 後提供多個不同資料集的結果。輸出含 mean、sample SD（單 seed 為 JSON null／終端 N/A）、逐 seed 配對差與所選基準；原研究方向為 Fixed 1.1 減對照，以及 C-Pairwise／C-Guarded 減 None／Original／Continuous。配對要求同 dataset、seed、policy、checkpoint、scores 及可比較的封存設定。缺基準或 seed 不符會標明，不能補值；同 dataset 的多 seed 必須來自同一封存 run，無法安全合併不同 run。工具輸出 JSON，沒有 CSV 模式，也不重新讀取 scores 或驗證 checkpoint。
+可加 `--datasets mooc --seeds 0 --policies val_auroc --methods none original fixed_1_1` 選擇子集，或在 `--input` 後提供多個不同資料集的結果。方法摘要包含均值與樣本標準差。程式先按 seed 計算配對差，再於 `paired_differences` 輸出候選方法、比較基準、seed 清單、樣本數、配對差均值與樣本標準差。單 seed 的樣本標準差為 JSON `null`／終端 `N/A`。配對方向為 Fixed 1.1 減對照，以及 C-Pairwise／C-Guarded 減 None／Original／Continuous。配對要求同 dataset、seed、policy、checkpoint、scores 及可比較的封存設定。缺基準或 seed 不符會標明，不能補值；同 dataset 的多 seed 必須來自同一封存 run，無法安全合併不同 run。工具輸出 JSON，沒有 CSV 模式，也不重新讀取 scores 或驗證 checkpoint。
 
 `python3 -B scripts/show_results.py` 可直接重算隨附的歷史逐 seed 結果，不需模型或資料；完整歷史結果也能作為 `--input src/research_runs/fixed_degree_up_exploration_20261123/report.json`。
 
 ## 200 事件 CPU smoke test
 
-以下腳本建立自己的臨時資料與新 run；執行會**真實訓練 1 epoch 並做 CPU 推論**，不是唯讀命令。原研究環境曾用相同 200 事件、seed 0、batch 10 驗證 shared 與 segmented，候選副本本階段未重跑訓練；乾淨外部環境尚未驗證。請確認資源與使用政策後自行執行：
+以下腳本建立臨時合成資料與新 run，**真實訓練 1 epoch 並做 CPU 推論**。[固定提交的外部驗證](#驗證與研究限制)以 200 事件、seed 0、batch 10 跑通 Shared 與 Segmented。請確認資源與使用政策後執行。
 
 ```bash
 mkdir -p work/runs work/prepared work/raw
@@ -284,21 +314,29 @@ python -B src/summarize_calibration_results.py --input "$RESULT" --output "$PWD/
 
 ## 驗證與研究限制
 
-| 層級 | 狀態 |
-|---|---|
-| 保存指標統計 | 隨附 JSON；`scripts/show_results.py` 可執行 |
-| 歷史逐筆 scores 指標重算 | `scripts/verify_scores.py --assets-root <外部原研究 src>`；需要未隨附的歷史模型輸入、checkpoint、scores，並核對程式及封存 hash；沿用 C 選擇、不重跑 bootstrap |
-| 公開資料前處理 | Wikipedia、Bitcoin-Alpha、MOOC 在原研究環境達 PASS-BITWISE；Digg BLOCKED |
-| 合成資料 CPU 端對端 | 原研究環境中 shared 與 segmented 各 200 事件、1 seed、1 epoch 通過；候選副本與乾淨外部環境未重訓 |
-| 真實公開資料的完整新訓練／推論 | 尚未端對端驗證 |
-| 新整合流程的 GPU 與乾淨外部環境 | 尚未驗證 |
+第二輪外部驗證（Phase 1–7）針對固定公開提交 [`02de8b53bcca5d8921cb80b19cc3c4ff0e6967a2`](https://github.com/tyTaco/AHEAD-Degree-Calibration/commit/02de8b53bcca5d8921cb80b19cc3c4ff0e6967a2) 執行。下表的實測結果限於該提交及所述環境。後續文件修訂沿用這份驗收紀錄。
 
-歷史 scores 缺 event ID，早期 checkpoint 有 Test 選模風險；C 使用歷史標籤而其發布時間不明；D 已探索。MOOC 的退課、Wikipedia 的封禁與 Alpha 負評均是代理標籤，不能直接當成已確認欺詐；歷史輸入的可重建不消除資料或標籤洩漏風險。固定 1.1 在資料集間有改善及退步，不可稱普遍改良。
+| 範圍 | 固定提交的驗收結果與限制 |
+|---|---|
+| 公開版本與 CPU 環境 | 匿名 HTTPS clone 通過。HEAD 相符，115 個追蹤檔，工作樹乾淨。全新 Python 3.12.3 venv、PyTorch 2.6.0+cpu 與 requirements 安裝成功，`pip check`、必要匯入及五個入口的 `--help` 均通過。 |
+| 保存指標統計 | 隨附 JSON；`scripts/show_results.py` 可執行 |
+| 公開單元測試 | 六個測試模組共 31 項，全部通過。 |
+| 歷史逐筆 scores 指標重算 | `scripts/verify_scores.py --assets-root <外部原研究 src>`；需要未隨附的歷史模型輸入、checkpoint、scores，並核對程式及封存 hash；沿用 C 選擇、不重跑 bootstrap |
+| 公開資料前處理 | Bitcoin-Alpha、Wikipedia、MOOC 共九個歷史模型輸入達 PASS-BITWISE，三組 manifest 與 `--verify-only` 均通過。Digg 歷史前處理仍為 **BLOCKED**。 |
+| 合成資料 CPU 端對端 | Shared 與 Segmented 各 200 事件、1 seed、1 epoch，均完成真實訓練、checkpoint 推論、六種校正及統計，共 72 項指標。 |
+| 封存重評估與校正檢查 | 公開 CLI 重評估 72/72 項完全一致，最大差異為 0。獨立有理數重算後轉成浮點，24 項 AP 完全一致，其餘 48 項 AUROC／PR-AUC 相差 1 個浮點末位（最大約 `5.55e-17`）。七個人工校正案例及三項封存拒絕檢查通過。 |
+| 真實資料 CPU 可行性 | Bitcoin-Alpha 以 Historical 資料執行 Custom experiment，seed 0、2 epochs。兩種選模、checkpoint CPU 推論、六種校正及 36 項指標均完成。 |
+| 未執行的外部驗證 | Wikipedia／MOOC 真實資料訓練、GPU 路徑及完整 5 seeds × 100 epochs 歷史實驗。 |
+
+在本輪 Landlock 隔離環境下，部分測試、訓練與出分記錄出現 `Error in cpuinfo: failed to parse processor information from /proc/cpuinfo`。相關命令成功結束，實際 CPU 訓練、checkpoint 推論及評估均完成。
+
+歷史 scores 缺 event ID，早期 checkpoint 有 Test 選模風險。C-Pairwise 與 C-Guarded 使用參考區間 C 的標籤，其發布時間不明。D 是已探索的 Development Set。本研究的校正改良目前缺乏獨立最終 Test 效能證據。MOOC 的退課、Wikipedia 的封禁與 Alpha 負評均是代理標籤，不能直接當成已確認欺詐；歷史輸入的可重建不消除資料或標籤洩漏風險。固定 1.1 在資料集間有改善及退步，不可稱普遍改良。
 
 CPU 測試（專案根目錄；以下不訓練真實模型）：
 
 ```bash
 python -B scripts/show_results.py
+python -B -m unittest discover -s tests -p 'test_repro_tools.py' -v
 python -B -m unittest discover -s tests -p 'test_statistics_entry.py' -v
 (cd src && python -B -m unittest discover -s tests -p 'test_prepare_reproducible.py' -v)
 (cd src && python -B -m unittest discover -s tests -p 'test_train_preprocessed_research.py' -v)
