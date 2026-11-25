@@ -20,3 +20,6 @@ src/saved_scores/
 *.tmp
 *.swp
 *.zip
+
+# Local datasets, isolated runs, scores and statistics.
+/work/

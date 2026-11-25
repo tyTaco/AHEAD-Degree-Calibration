@@ -99,6 +99,10 @@ MOOC 在此 D 區間的低度數組沒有正類事件。對低度數事件套用
 | `src/conservative_pairwise_development.py` | C-Guarded 倍率選擇 |
 | `src/train_shared_research.py` | Digg、Bitcoin-Alpha、Wikipedia 訓練 |
 | `src/train_segmented_research.py` | MOOC 訓練 |
+| `src/prepare_reproducible.py`、`src/preprocessing_profiles.json` | Historical／Custom 前處理及 manifest 驗證 |
+| `src/train_preprocessed_research.py` | 資料驗證及隔離訓練入口 |
+| `src/score_preprocessed_research.py`、`src/evaluate_preprocessed_calibration.py` | checkpoint 出分、六方法評估與重讀 |
+| `src/summarize_calibration_results.py` | 新 run 與歷史結果統計 |
 | `src/prepare_jodie_research.py` | JODIE 格式資料轉換 |
 | `src/research_runs/` | 實驗結果與版本、模型選擇紀錄 |
 | `tests/` | 結果展示與驗證工具測試 |
@@ -135,92 +139,173 @@ python -m pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/
 python -m pip install -r requirements.txt
 ```
 
-其他平台或 CPU-only 環境請參考 [PyTorch 安裝指引](https://pytorch.org/get-started/locally/)。NVIDIA 驅動顯示的 CUDA 支援版本與 PyTorch CUDA build、CUDA toolkit 版本並不相同。環境相容性與完整重現範圍見下方說明。
-
-## 資料準備
-
-本專案提供程式及實驗統計，不包含原始資料、處理後資料、模型權重或逐事件分數。請依資料來源取得資料並確認使用條款。
-
-模型從 `src/` 工作目錄讀取以下檔案（路徑以專案根目錄表示）：
-
-```text
-src/processed_data/<dataset>/ml_<dataset>.csv
-src/processed_data/<dataset>/ml_<dataset>.npy
-src/processed_data/<dataset>/ml_<dataset>_node.npy
-```
-
-`<dataset>` 為 `digg`、`bitcoinalpha`、`wikipedia` 或 `mooc`。CSV 保存互動及標籤，兩個 NPY 檔分別保存邊與節點特徵。
-
-Wikipedia 與 MOOC 可使用 JODIE 格式轉換工具。以下指令從專案根目錄執行，請將 `/path/to/` 替換為實際資料位置：
+CPU-only 可改用下列指令**取代**上方的 CUDA PyTorch 安裝命令，再執行相同的 `pip install -r requirements.txt`；新環境安裝與 CPU-only build 本身尚未驗證，歷史 seal 的精確 PyTorch 版本也可能不同：
 
 ```bash
-python -B src/prepare_jodie_research.py --source /path/to/wikipedia.csv \
-  --destination src/processed_data/wikipedia --dataset wikipedia
-python -B src/prepare_jodie_research.py --source /path/to/mooc.csv \
-  --destination src/processed_data/mooc --dataset mooc
+python -m pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cpu
 ```
 
-輸出包含上述三個檔案及 `conversion_manifest.json`。輸出目錄必須不存在；程式會檢查輸入欄位、事件排序、缺值及特徵格式。轉換使用全資料的 ID mapping，並非嚴格的線上因果流程。
+其他平台請參考 [PyTorch 安裝指引](https://pytorch.org/get-started/locally/)及[歷史版本命令](https://pytorch.org/get-started/previous-versions/)。NVIDIA 驅動顯示的 CUDA 支援版本與 PyTorch CUDA build、CUDA toolkit 版本並不相同。環境相容性與完整重現範圍見下方說明。
 
-Digg 與 Bitcoin-Alpha 的完整前處理鏈仍有缺項，現有公開資料不足以保證重建與原實驗完全相同的輸入。原始資料檔名及版本資訊可參考 `src/research_runs/` 中的 provenance 紀錄。
+## 資料準備與前處理
 
-## 模型訓練與評估
+候選版本不含原始／處理後資料、checkpoint 或逐事件 scores。下載前請查核來源使用及再散布條件；可以下載不代表允許重新散布。本節指令在**專案根目錄**執行，`work/` 為本地工作資料，不納入版本控制。
 
-以下以 Digg 為例，展示本研究使用的訓練參數與執行方式；完整訓練與分數重建的驗證範圍請參閱[研究限制](#研究限制)。執行前須準備相符的處理後資料、相依套件、標籤及運算設備。從專案根目錄執行：
-
-```bash
-cd src
-AHEAD_SHARED_TRAINING_CONFIRM=1 AHEAD_RESEARCH_RUN_ID=my_new_digg_run \
-AHEAD_DEGREE_CALIB_MODE=original python -B train_shared_research.py \
-  --model_name AHEADGraphMixer --dataset_name digg --num_runs 5 --num_epochs 100 \
-  --batch_size 200 --num_neighbors 20 --sample_neighbor_strategy recent \
-  --time_gap 2000 --optimizer Adam --learning_rate 0.0001 --val_ratio 0.05 --test_ratio 0.5 --gpu 0
-```
-
-`AHEAD_RESEARCH_RUN_ID` 指定實驗名稱，必須使用新名稱；`AHEAD_SHARED_TRAINING_CONFIRM=1` 為訓練確認開關。輸出位於 `src/research_runs/my_new_digg_run/`。`--gpu 0` 在 PyTorch 偵測到 CUDA 可用時選擇可見 GPU 0，否則使用 CPU；`--gpu -1` 指定使用 CPU。
-
-Wikipedia 與 Bitcoin-Alpha 可調整資料集名稱及實驗名稱；MOOC 使用 `train_segmented_research.py`，並將確認開關改為 `AHEAD_SEGMENTED_TRAINING_CONFIRM=1`。模型選擇資訊保存於各 seed 的 `selection.json` 與 `selection_complete.json`。
-
-開發集推論程式為 `src/run_degree_development.py`，MOOC 使用 `src/run_segmented_development.py`；`src/evaluate_shared_research.py` 為測試集評估程式。這些程式需要相符的實驗檔案與 checkpoint，並會寫入結果，請使用獨立的實驗目錄。
-
-> 注意：衍生自原始 AHEAD 的訓練程式 `src/train.py` 可能刪除 checkpoint，且可能依 Test 表現保存模型。`src/eval_degree_ablation.py` 使用固定輸出路徑，可能覆寫結果。請勿直接在既有實驗目錄執行這些程式。
-
-## 實驗重現與測試
-
-| 等級 | 功能 | 驗證範圍 |
+| 資料集 | 公開原始資料 | 本研究標籤與狀態 |
 |---|---|---|
-| Level 1 | 結果展示 | 已保存指標的統計計算及配對摘要核對 |
-| Level 2 | 指標驗證 | 原實驗環境 CPU 驗證，四資料集共 720 項指標 |
-| Level 3 | 完整實驗重現 | 從資料前處理、訓練至推論的完整流程仍待驗證 |
+| Wikipedia | [SNAP JODIE CSV](https://snap.stanford.edu/jodie/wikipedia.csv) | state label 封禁相關最後互動代理；公開來源至歷史三輸入 PASS-BITWISE，歷史原轉換程式仍未知 |
+| Bitcoin-Alpha | [SNAP CSV gzip](https://snap.stanford.edu/data/soc-sign-bitcoinalpha.csv.gz) | 負信任評分代理，不等於已證實欺詐；公開來源至歷史三輸入 PASS-BITWISE，重建候選不證明歷史原程式 |
+| MOOC | [SNAP JODIE CSV](https://snap.stanford.edu/jodie/mooc.csv) | 退課相關最後互動代理；公開來源至歷史三輸入 PASS-BITWISE，並非 AHEAD 論文的六個資料集之一 |
+| Digg | [KONECT reply network](https://konect.cc/networks/munmun_digg_reply/) | 歷史資料的合成異常注入完整規則未知；前處理 **BLOCKED**，兩模式均拒絕生成 |
 
-### Level 2：評估指標驗證
+公開檔案可能更新；Historical 模式會嚴格核對來源及輸出 SHA-256。上列三個 PASS-BITWISE 是原研究環境的實際驗證，不保證其他平台重新生成 NPY 時逐位一致，也不表示找回全部歷史原始程式。
 
-此功能需要原實驗的 `research_runs/`、`processed_data/`、checkpoint、逐事件分數及相符的程式與封存紀錄。在原實驗相容環境的專案根目錄執行：
-
-```bash
-PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
-python -B scripts/verify_scores.py --assets-root /path/to/original/AHEAD/src --dataset digg
-```
-
-`--assets-root` 指向包含 `research_runs/` 與 `processed_data/` 的原實驗 `src/` 或其上一層目錄。`--dataset` 支援 `digg`、`bitcoinalpha`、`wikipedia`、`mooc`、`all`。單一資料集驗證 180 項，全部資料集驗證 720 項。
-
-工具檢查 Python、PyTorch、NumPy、pandas、scikit-learn 的精確版本及相關檔案 SHA-256，重新計算六種方法的評估指標，並與保存結果比對。沿用已保存的 C 倍率選擇結果，不重新執行 Bootstrap、模型推論或訓練。驗證不使用 GPU，也不修改實驗檔案。若驗證失敗，請確認路徑、版本及檔案一致性。
-
-### 單元測試
+下載範例（Wikipedia 約 560 MB、MOOC 約 41 MB）：
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES='' python3 -B -m unittest discover -s tests -p 'test_repro_tools.py' -v
+mkdir -p work/raw work/prepared work/runs
+curl -fL --output work/raw/wikipedia.csv https://snap.stanford.edu/jodie/wikipedia.csv
+curl -fL --output work/raw/mooc.csv https://snap.stanford.edu/jodie/mooc.csv
+curl -fL --output work/raw/soc-sign-bitcoinalpha.csv.gz https://snap.stanford.edu/data/soc-sign-bitcoinalpha.csv.gz
 ```
 
-測試涵蓋統計摘要、缺少檔案、雜湊值不一致及錯誤處理，不需要原始資料或 GPU。Windows 可執行 `py -3 -B -m unittest discover -s tests -p test_repro_tools.py -v`。
+選擇一組資料及不存在的輸出目錄，再執行 Historical 前處理：
 
-## 研究限制
+```bash
+DATASET=mooc
+SOURCE="$PWD/work/raw/mooc.csv"
+PREP="$PWD/work/prepared/mooc_historical"
+python -B src/prepare_reproducible.py --dataset "$DATASET" --mode historical \
+  --source "$SOURCE" --destination "$PREP"
+python -B src/prepare_reproducible.py --dataset "$DATASET" --mode historical \
+  --source "$SOURCE" --destination "$PREP" --verify-only
+```
 
-- D 區間已用於探索，Fixed 1.1 的方向受探索結果影響，因此結果不是獨立測試集的確認性證據。
-- C 方法使用歷史標籤，標籤可用時間尚未確定；保存的逐事件分數缺少 event ID。MOOC 的觀察窗截尾亦未確定，因此不能將結果解讀為即時退課預測或已驗證的線上因果流程。
-- 原始 Test 選模可能存在資料洩漏。Level 2 不使用舊 Test 標籤評估或選參數，但完整檔案雜湊與 CSV／OS 緩衝可能讀取其他區段的位元組，並非作業系統層級隔離。
-- Digg 合成異常注入及 Bitcoin-Alpha 標籤處理的完整重建流程仍不完整。MOOC 的來源、轉換程式與產物雜湊已與原 manifest 核對，但 Wikipedia 與 MOOC 的重新轉換尚未驗證與原產物完全一致。
-- Level 2 的驗證以原實驗環境為準；全新環境安裝、跨平台相容性、完整 CPU 訓練及從新訓練到完整分數的流程仍未驗證。分別執行模型推論也不保證原始分數完全一致。
+Wikipedia 使用 `DATASET=wikipedia` 和 `SOURCE="$PWD/work/raw/wikipedia.csv"`；Bitcoin-Alpha 使用 `DATASET=bitcoinalpha` 和 `SOURCE="$PWD/work/raw/soc-sign-bitcoinalpha.csv.gz"`，並各自更換尚不存在的 `PREP`。輸出為 `ml_<dataset>.csv`、`ml_<dataset>.npy`、`ml_<dataset>_node.npy` 與 `reproducibility_manifest.json`。Historical 模式不接受 C/F override；若 SHA 或結構不符則停止，不會放寬要求。
+
+自己的合法輸入可使用 `--mode custom`；Wiki/MOOC 應是 JODIE 格式 CSV，Bitcoin-Alpha 為 SNAP 四欄格式。Custom 可選 `--edge-order C|F --node-order C|F`，輸出 `CUSTOM-VALID` 表示符合自身 manifest，**不是**歷史資料重現。不同 mode 應使用獨立目錄，不能覆蓋既有產物。
+
+## 新實驗：訓練、出分與六方法
+
+以下沿用前節 `DATASET`、`SOURCE`、`PREP`；每個 run 需要不同的 `RUN_ID`，工作區不可在原始 `src/` 下。GPU 需要自行安裝相容 PyTorch／驅動；原研究環境使用 GPU，但新整合入口的 GPU 執行尚未實測。以下以 CPU 為例：
+
+```bash
+RUN_ID=my_mooc_run_001
+MANIFEST=$(python -c 'import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "$PREP/reproducibility_manifest.json")
+AHEAD_INTEGRATION_TRAINING_CONFIRM=1 python -B src/train_preprocessed_research.py \
+  --dataset "$DATASET" --data-mode historical --source "$SOURCE" --data-dir "$PREP" \
+  --manifest-sha256 "$MANIFEST" --experiment-mode historical --device cpu \
+  --run-id "$RUN_ID" --workspace-parent "$PWD/work/runs" --execute
+```
+
+先透過可信紀錄核對 manifest hash；範例只是方便設定命令變數，單獨計算現有檔案 hash 不構成來源驗證。訓練入口會再次檢查來源、manifest、profile、三個輸入及 schema，將檔案複製至 `work/runs/$RUN_ID/project/`，保留原研究目錄。可將 `--execute` 改為 `--verify-only`（唯讀）或 `--dry-run`（複製並檢查，不訓練）。正式訓練耗時及記憶體需求依資料量與硬體而異。
+
+Historical experiment 從公開的 `src/research_runs/` provenance 讀取原研究參數：5 個 seeds（0–4）、100 epochs、batch 200、recent 20、time gap 2000、Adam 0.0001；`--device cpu` 與歷史 GPU 不同時會記錄差異。Wikipedia／Bitcoin-Alpha 自動選 shared；MOOC 選 segmented。兩種 checkpoint selection 共用同一條訓練軌跡，Validation AUROC 使用 B labels，Train Loss 不以 B labels 決定但共用流程仍計算 B AUROC。
+
+若使用自訂資料及測試參數，改用 `--data-mode custom --experiment-mode custom`，例如加 `--num-runs 1 --num-epochs 1 --batch-size 10`；可用 `--device cpu` 或 `--device cuda:0`、`--learning-rate` 等其他選項詳見 `--help`。資料 mode 與訓練 mode 分開記錄。若改變 val/test ratio、neighbor 數或 sampler，現有出分協定可能拒絕；目前出分要求 0.05／0.5、recent、20 neighbors。
+
+訓練完成後，同一 checkpoint 的六方法共用一次 C/D raw scores 與 sampled degrees，不需訓練六次。下例對 seed 0、兩種選模、全部方法出分與評估；CPU 推論會寫入這個新 run，請先確認工作負載：
+
+```bash
+PROJECT="$PWD/work/runs/$RUN_ID/project"
+RESULT="$PWD/work/runs/$RUN_ID/calibration_result.json"
+python -B src/score_preprocessed_research.py --project-root "$PROJECT" \
+  --source "$SOURCE" --run-id "$RUN_ID" --dataset "$DATASET" \
+  --seeds 0 --policies val_auroc train_loss --methods all --mode historical \
+  --output "$RESULT" --confirm-scores
+```
+
+可改 `--seeds 0 1 2 3 4`；單一或多個方法使用如 `--methods none original fixed_1_1`。若要切換已支援校正參數，使用 `--mode custom` 搭配 `--fixed-multiplier`、`--block-size`、`--replicates`、`--bootstrap-seed`；其他固定公式不因參數切換而更動。選擇的 seed/policy 請在第一次出分時一次列齊：已有 `degree_development/` 時會拒絕覆寫或追加。Scores 與事件 ID 位於工作區 `project/research_runs/$RUN_ID/degree_development/`，輸出包含各 seed／policy 的三項指標。
+
+重讀封存並以另一組方法評估（使用者可在確認 seal 來源後執行）：
+
+```bash
+SEAL="$PROJECT/research_runs/$RUN_ID/degree_development/development_complete.json"
+SEAL_SHA=$(python -c 'import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "$SEAL")
+python -B src/evaluate_preprocessed_calibration.py --project-root "$PROJECT" \
+  --source "$SOURCE" --run-id "$RUN_ID" --dataset "$DATASET" --seeds 0 \
+  --policies val_auroc train_loss --methods none original --mode historical \
+  --development-seal-sha256 "$SEAL_SHA" --require-integration \
+  --output "$PWD/work/runs/$RUN_ID/rechecked.json"
+```
+
+新 scores 在實際推論 batch 保存 event ID；舊 scores 缺 event ID，只有顯式 `--allow-legacy-event-alignment` 才會以 timestamp 限制核對。重算 C 方法會用 C 標籤；實際標籤發布時間未知，D 已探索，不是獨立 Test。
+
+## 結果統計
+
+對已保存的 per-run JSON，執行目錄為專案根目錄：
+
+```bash
+python -B src/summarize_calibration_results.py --input "$RESULT" \
+  --output "$PWD/work/runs/$RUN_ID/statistics.json"
+```
+
+可加 `--datasets mooc --seeds 0 --policies val_auroc --methods none original fixed_1_1` 選擇子集，或在 `--input` 後提供多個不同資料集的結果。輸出含 mean、sample SD（單 seed 為 JSON null／終端 N/A）、逐 seed 配對差與所選基準；原研究方向為 Fixed 1.1 減對照，以及 C-Pairwise／C-Guarded 減 None／Original／Continuous。配對要求同 dataset、seed、policy、checkpoint、scores 及可比較的封存設定。缺基準或 seed 不符會標明，不能補值；同 dataset 的多 seed 必須來自同一封存 run，無法安全合併不同 run。工具輸出 JSON，沒有 CSV 模式，也不重新讀取 scores 或驗證 checkpoint。
+
+`python3 -B scripts/show_results.py` 可直接重算隨附的歷史逐 seed 結果，不需模型或資料；完整歷史結果也能作為 `--input src/research_runs/fixed_degree_up_exploration_20261123/report.json`。
+
+## 200 事件 CPU smoke test
+
+以下腳本建立自己的臨時資料與新 run；執行會**真實訓練 1 epoch 並做 CPU 推論**，不是唯讀命令。原研究環境曾用相同 200 事件、seed 0、batch 10 驗證 shared 與 segmented，候選副本本階段未重跑訓練；乾淨外部環境尚未驗證。請確認資源與使用政策後自行執行：
+
+```bash
+mkdir -p work/runs work/prepared work/raw
+SMOKE=$(mktemp -d "$PWD/work/raw/smoke-XXXXXXXX")
+python -B - "$SMOKE/synthetic.csv" <<'PY'
+import csv,sys
+with open(sys.argv[1],'x',newline='') as f:
+    w=csv.writer(f); w.writerow(['user','item','timestamp','state_label','features'])
+    for i in range(200):
+        w.writerow([f'user{i%10}',f'item{(i+i//10)%5}',i+1,i%2,0.1+(i%7)*0.01,0.2,0.3,0.4])
+PY
+DATASET=mooc
+SOURCE="$SMOKE/synthetic.csv"
+PREP="$SMOKE/prepared"
+RUN_ID="smoke_$(basename "$SMOKE")"
+python -B src/prepare_reproducible.py --dataset "$DATASET" --mode custom --source "$SOURCE" --destination "$PREP"
+python -B src/prepare_reproducible.py --dataset "$DATASET" --mode custom --source "$SOURCE" --destination "$PREP" --verify-only
+MANIFEST=$(python -c 'import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "$PREP/reproducibility_manifest.json")
+CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+AHEAD_INTEGRATION_TRAINING_CONFIRM=1 python -B src/train_preprocessed_research.py \
+  --dataset "$DATASET" --data-mode custom --source "$SOURCE" --data-dir "$PREP" \
+  --manifest-sha256 "$MANIFEST" --experiment-mode custom --device cpu \
+  --run-id "$RUN_ID" --workspace-parent "$PWD/work/runs" --num-runs 1 --num-epochs 1 --batch-size 10 --execute
+PROJECT="$PWD/work/runs/$RUN_ID/project"
+RESULT="$PWD/work/runs/$RUN_ID/calibration_result.json"
+CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+python -B src/score_preprocessed_research.py --project-root "$PROJECT" --source "$SOURCE" \
+  --run-id "$RUN_ID" --dataset "$DATASET" --seeds 0 --policies val_auroc train_loss \
+  --methods all --mode custom --block-size 5 --replicates 20 --bootstrap-seed 20261121 \
+  --output "$RESULT" --confirm-scores
+python -B src/summarize_calibration_results.py --input "$RESULT" --output "$PWD/work/runs/$RUN_ID/statistics.json"
+```
+
+改成 `DATASET=wikipedia`、使用新的 `SMOKE` 和 `RUN_ID` 可測 shared；這是合成資料，不是實際 Wikipedia 結果。C-Guarded 不一定會進入 bootstrap：只有觀察到候選在 C 的改善時才執行抽樣。結果僅驗證串接，不代表方法改善。
+
+## 驗證與研究限制
+
+| 層級 | 狀態 |
+|---|---|
+| 保存指標統計 | 隨附 JSON；`scripts/show_results.py` 可執行 |
+| 歷史逐筆 scores 指標重算 | `scripts/verify_scores.py --assets-root <外部原研究 src>`；需要未隨附的歷史模型輸入、checkpoint、scores，並核對程式及封存 hash；沿用 C 選擇、不重跑 bootstrap |
+| 公開資料前處理 | Wikipedia、Bitcoin-Alpha、MOOC 在原研究環境達 PASS-BITWISE；Digg BLOCKED |
+| 合成資料 CPU 端對端 | 原研究環境中 shared 與 segmented 各 200 事件、1 seed、1 epoch 通過；候選副本與乾淨外部環境未重訓 |
+| 真實公開資料的完整新訓練／推論 | 尚未端對端驗證 |
+| 新整合流程的 GPU 與乾淨外部環境 | 尚未驗證 |
+
+歷史 scores 缺 event ID，早期 checkpoint 有 Test 選模風險；C 使用歷史標籤而其發布時間不明；D 已探索。MOOC 的退課、Wikipedia 的封禁與 Alpha 負評均是代理標籤，不能直接當成已確認欺詐；歷史輸入的可重建不消除資料或標籤洩漏風險。固定 1.1 在資料集間有改善及退步，不可稱普遍改良。
+
+CPU 測試（專案根目錄；以下不訓練真實模型）：
+
+```bash
+python -B scripts/show_results.py
+python -B -m unittest discover -s tests -p 'test_statistics_entry.py' -v
+(cd src && python -B -m unittest discover -s tests -p 'test_prepare_reproducible.py' -v)
+(cd src && python -B -m unittest discover -s tests -p 'test_train_preprocessed_research.py' -v)
+(cd src && python -B -m unittest discover -s tests -p 'test_score_preprocessed_research.py' -v)
+(cd src && python -B -m unittest discover -s tests -p 'test_evaluate_preprocessed_calibration.py' -v)
+```
+
 
 ## 參考資料與授權
 
@@ -228,4 +313,4 @@ PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES='' python3 -B -m unittest discove
 
 JODIE：S. Kumar, X. Zhang, J. Leskovec, [Predicting Dynamic Embedding Trajectory in Temporal Interaction Networks](https://doi.org/10.1145/3292500.3330895), KDD 2019, §4.2。
 
-原作者 MIT 授權保留於 `LICENSE` 與 `src/LICENSE`。新增程式的權利與授權由相關權利人決定。DyGLib、GraphMixer、JODIE 的來源及授權範圍見 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。資料、模型權重、逐事件分數及衍生結果的再散布權利須依各來源條款確認。
+原作者 MIT 授權與著作權聲明保留於 `LICENSE` 與 `src/LICENSE`。本研究對其有權授權的原創程式新增及修改，採用 `LICENSE` 中的 MIT 條款；著作權仍屬各權利人。第三方程式維持各自適用的授權及聲明，並不因本研究的授權承諾而取得其他權利。DyGLib、GraphMixer、JODIE 的來源及待確認事項見 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。資料、模型權重、逐事件分數及歷史摘要等衍生成果的再散布權利仍須依各來源條款確認。
